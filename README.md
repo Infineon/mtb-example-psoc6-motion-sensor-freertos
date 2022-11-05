@@ -4,7 +4,7 @@ This code example demonstrates how to interface PSoC&trade; 6 MCU with a [BMI160
 
 [View this README on GitHub.](https://github.com/Infineon/mtb-example-psoc6-bmi160-motion-sensor-freertos)
 
-[Provide feedback on this code example.](https://cypress.co1.qualtrics.com/jfe/form/SV_1NTns53sK2yiljn?Q_EED=eyJVbmlxdWUgRG9jIElkIjoiQ0UyMzE4NjQiLCJTcGVjIE51bWJlciI6IjAwMi0zMTg2NCIsIkRvYyBUaXRsZSI6IlBTb0MmdHJhZGU7IDYgTUNVOiBJbnRlcmZhY2luZyB0aGUgQk1JMTYwIG1vdGlvbiBzZW5zb3IgdGhyb3VnaCBJMkMgKEZyZWVSVE9TKSIsInJpZCI6InNtcngiLCJEb2MgdmVyc2lvbiI6IjEuMC4wIiwiRG9jIExhbmd1YWdlIjoiRW5nbGlzaCIsIkRvYyBEaXZpc2lvbiI6Ik1DRCIsIkRvYyBCVSI6IklDVyIsIkRvYyBGYW1pbHkiOiJQU09DIn0=)
+[Provide feedback on this code example.](https://cypress.co1.qualtrics.com/jfe/form/SV_1NTns53sK2yiljn?Q_EED=eyJVbmlxdWUgRG9jIElkIjoiQ0UyMzE4NjQiLCJTcGVjIE51bWJlciI6IjAwMi0zMTg2NCIsIkRvYyBUaXRsZSI6IlBTb0MmdHJhZGU7IDYgTUNVOiBJbnRlcmZhY2luZyB0aGUgQk1JMTYwIG1vdGlvbiBzZW5zb3IgdGhyb3VnaCBJMkMgKEZyZWVSVE9TKSIsInJpZCI6InNtcngiLCJEb2MgdmVyc2lvbiI6IjEuMS4wIiwiRG9jIExhbmd1YWdlIjoiRW5nbGlzaCIsIkRvYyBEaXZpc2lvbiI6Ik1DRCIsIkRvYyBCVSI6IklDVyIsIkRvYyBGYW1pbHkiOiJQU09DIn0=)
 
 
 ## Requirements
@@ -17,14 +17,14 @@ This code example demonstrates how to interface PSoC&trade; 6 MCU with a [BMI160
 
 ## Supported toolchains (make variable 'TOOLCHAIN')
 
-- GNU Arm® embedded compiler v9.3.1 (`GCC_ARM`) - Default value of `TOOLCHAIN`
+- GNU Arm® embedded compiler v9.3.1 (`GCC_ARM`) – Default value of `TOOLCHAIN`
 - Arm&reg; compiler v6.13 (`ARM`)
 - IAR C/C++ compiler v8.42.2 (`IAR`)
 
 
 ## Supported kits (make variable 'TARGET')
 
-- [PSoC&trade; 6 Bluetooth&reg; LE pioneer kit](https://www.cypress.com/CY8CKIT-062-BLE) (`CY8CKIT-062-BLE`) - Default value of `TARGET`
+- [PSoC&trade; 6 Bluetooth&reg; LE pioneer kit](https://www.cypress.com/CY8CKIT-062-BLE) (`CY8CKIT-062-BLE`) – Default value of `TARGET`
 - [PSoC&trade; 6 Wi-Fi Bluetooth&reg; prototyping kit](https://www.cypress.com/CY8CPROTO-062-4343W) (`CY8CPROTO-062-4343W`)
 - [PSoC&trade; 6 Wi-Fi Bluetooth&reg; pioneer kit](https://www.cypress.com/CY8CKIT-062-WiFi-BT) (`CY8CKIT-062-WIFI-BT`)
 - [PSoC&trade; 6 Bluetooth&reg; LE prototyping kit](https://www.cypress.com/CY8CPROTO-063-BLE) (`CY8CPROTO-063-BLE`)
@@ -34,16 +34,18 @@ This code example demonstrates how to interface PSoC&trade; 6 MCU with a [BMI160
 - [PSoC&trade; 62S3 Wi-Fi Bluetooth&reg; prototyping kit](https://www.cypress.com/CY8CPROTO-062S3-4343W) (`CY8CPROTO-062S3-4343W`)
 - [PSoC&trade; 62S4 pioneer kit](https://www.cypress.com/CY8CKIT-062S4) (`CY8CKIT-062S4`)
 - [PSoC&trade; 64 "Secure Boot" Wi-Fi Bluetooth&reg; pioneer kit](https://www.cypress.com/CY8CKIT-064B0S2-4343W) (`CY8CKIT-064B0S2-4343W`)
+- [PSoC&trade; 62S2 evaluation kit](https://www.cypress.com/CY8CEVAL-062S2) (`CY8CEVAL-062S2`, `CY8CEVAL-062S2-LAI-4373M2`)
 
 ## Hardware setup
 
 This example requires the [BMI160 inertial measurement unit](https://www.bosch-sensortec.com/products/motion-sensors/imus/bmi160.html) to be interfaced with PSoC&trade; 6 MCU using one of the kits mentioned above.
 
+
 ### Interfacing details
 
 There are primarily two ways of interfacing the BMI160 motion sensor with the PSoC&trade; 6 MCU in this code example:
 
-1. **Shields:** [CY8CKIT-028-EPD](https://www.cypress.com/documentation/development-kitsboards/e-ink-display-shield-board-cy8ckit-028-epd) or [CY8CKIT-028-TFT](https://www.cypress.com/documentation/development-kitsboards/tft-display-shield-board-cy8ckit-028-tft) *(On some supported kits only):* You can plug in the shield to the PSoC&trade; 6 kit and configure the `INTERFACE_USED` and `BMI160_INTERRUPT_CHANNEL` macros in *motion_task.h* file as described in the [Operation](#operation) section.
+1. **Shields:** [CY8CKIT-028-EPD](https://www.cypress.com/documentation/development-kitsboards/e-ink-display-shield-board-cy8ckit-028-epd) or [CY8CKIT-028-TFT](https://www.cypress.com/documentation/development-kitsboards/tft-display-shield-board-cy8ckit-028-tft) *(On some supported kits only):* You can plug in the shield to the PSoC&trade; 6 MCU kit and configure the `INTERFACE_USED` and `BMI160_INTERRUPT_CHANNEL` macros in *motion_task.h* file as described in the [Operation](#operation) section.
 
    **Note:** This method of interfacing is not supported by all the kits mentioned in the [Supported kits](#supported-kits-make-variable-target) section. See Table 1 for supported interfaces for each supported kit and the corresponding interrupt pin interfacing details.
 
@@ -57,7 +59,7 @@ There are primarily two ways of interfacing the BMI160 motion sensor with the PS
 
      ![](images/bmi160-custom-interfacing.png)
 
-The Table 1 lists the supported interfaces for each of the supported kits and the corresponding interrupt pin interfacing details. Note that for the functionality of this code example, you need to use only one of the BMI160's interrupt pins (either INT1 or INT2, not both).
+Table 1 lists the supported interfaces for each supported kit and the corresponding interrupt pin interfacing details. Note that for the functionality of this code example, you need to use only one of the BMI160's interrupt pins (either INT1 or INT2, not both).
 
 - In case of shields (CY8CKIT-028-EPD and CY8CKIT-028-TFT), the PSoC&trade; 6 GPIO pins that connect to the BMI160's INT1 and INT2 pins are also shown in Table 1. The code example automatically configures these GPIO pins when you define the `INTERFACE_USED` macro and the details in the table are for your information only.
 
@@ -76,6 +78,8 @@ The Table 1 lists the supported interfaces for each of the supported kits and th
 | CYW9P62S1-43012EVB-01 | CY8CKIT_028_TFT <br> CUSTOM_INTERFACE | P6[4] <br> User-defined | P6[5] <br> User-defined |
 | CY8CPROTO-062S3-4343W | CUSTOM_INTERFACE | User-defined | User-defined |
 | CY8CKIT-064B0S2-4343W | CY8CKIT_028_EPD <br> CY8CKIT_028_TFT <br> CUSTOM_INTERFACE | P7[6] <br> P10[2] <br> User-defined | P7[5] <br> P10[3] <br> User-defined |
+| CY8CEVAL-062S2 | CY8CKIT_028_EPD <br> CY8CKIT_028_TFT <br> CUSTOM_INTERFACE | P7[6] <br> P10[2] <br> User-defined | P0[5] <br> P10[3] <br> User-defined |
+| CY8CEVAL-062S2-LAI-4373M2 | CY8CKIT_028_EPD <br> CY8CKIT_028_TFT <br> CUSTOM_INTERFACE | P7[6] <br> P10[2] <br> User-defined | P0[5] <br> P10[3] <br> User-defined |
 
 <br>
 
@@ -83,9 +87,9 @@ This example uses the board's default configuration. See the kit user guide to e
 
 **Notes:**
 
-- The PSoC&trade; 62S1 Wi-Fi Bluetooth&reg; pioneer kit - CYW9P62S1-43012EVB-01 cannot be used with the CY8CKIT-028-EPD shield to evaluate the complete functionality of this example. This is because the CYW9P62S1-43012EVB-01 kit does not have any GPIO connections to the D8 and D9 pins compatible with Arduino to which the motion sensor's interrupt pins interface on the CY8CKIT-028-EPD shield.
+- The PSoC&trade; 62S1 Wi-Fi Bluetooth&reg; pioneer kit (CYW9P62S1-43012EVB-01) cannot be used with the CY8CKIT-028-EPD shield to evaluate the complete functionality of this example. This is because this kit does not have any GPIO connections to the D8 and D9 pins compatible with Arduino to which the motion sensor's interrupt pins interface on the CY8CKIT-028-EPD shield.
 
-- The PSoC&trade; 6 Bluetooth&reg; LE pioneer kit (CY8CKIT-062-BLE) and the PSoC&trade; 6 Wi-Fi Bluetooth&reg; pioneer kit (CY8CKIT-062-WIFI-BT) ship with KitProg2 installed. The ModusToolbox&trade; software requires KitProg3. Before using this code example, make sure that the board is upgraded to KitProg3. The tool and instructions are available in the [Firmware Loader](https://github.com/Infineon/Firmware-loader) GitHub repository. If you do not upgrade, you will see an error like "unable to find CMSIS-DAP device" or "KitProg firmware is out of date".
+- The PSoC&trade; 6 Bluetooth&reg; LE pioneer kit (CY8CKIT-062-BLE) and the PSoC&trade; 6 Wi-Fi Bluetooth&reg; pioneer kit (CY8CKIT-062-WIFI-BT) ship with KitProg2 installed. The ModusToolbox&trade; software requires KitProg3. Before using this code example, make sure that the board is upgraded to KitProg3. The tool and instructions are available in the [firmware loader](https://github.com/Infineon/Firmware-loader) GitHub repository. If you do not upgrade, you will see an error like "unable to find CMSIS-DAP device" or "KitProg firmware is out of date".
 
 ## Software setup
 
@@ -93,28 +97,27 @@ Install a terminal emulator if you don't have one. Instructions in this document
 
 This example requires no additional software or tools.
 
-
 ## Using the code example
 
 Create the project and open it using one of the following:
 
 <details><summary><b>In Eclipse IDE for ModusToolbox&trade; software</b></summary>
 
-1. Click the **New Application** link in the **Quick Panel** (or, use **File** > **New** > **ModusToolbox Application**). This launches the [Project Creator](https://www.cypress.com/ModusToolboxProjectCreator) tool.
+1. Click the **New application** link in the **quick panel** (or, use **File** > **New** > **ModusToolbox&trade; application**). This launches the [project creator](https://www.cypress.com/ModusToolboxProjectCreator) tool.
 
-2. Pick a kit supported by the code example from the list shown in the **Project Creator - Choose Board Support Package (BSP)** dialog.
+2. Pick a kit supported by the code example from the list shown in the **Project creator - Choose board support package (BSP)** dialog.
 
-   When you select a supported kit, the example is reconfigured automatically to work with the kit. To work with a different supported kit later, use the [Library Manager](https://www.cypress.com/ModusToolboxLibraryManager) to choose the BSP for the supported kit. You can use the Library Manager to select or update the BSP and firmware libraries used in this application. To access the Library Manager, click the link from the **Quick Panel**.
+   When you select a supported kit, the example is reconfigured automatically to work with the kit. To work with a different supported kit later, use the [library manager](https://www.cypress.com/ModusToolboxLibraryManager) to choose the BSP for the supported kit. You can use the library manager to select or update the BSP and firmware libraries used in this application. To access the library manager, click the link from the **quick panel**.
 
    You can also just start the application creation process again and select a different kit.
 
    If you want to use the application for a kit not listed here, you may need to update the source files. If the kit does not have the required resources, the application may not work.
 
-3. In the **Project Creator - Select Application** dialog, choose the example by enabling the checkbox.
+3. In the **Project creator - Select application** dialog, choose the example by enabling the checkbox.
 
-4. (Optional) Change the suggested **New Application Name**.
+4. (Optional) Change the suggested **New application name**.
 
-5. The **Application(s) Root Path** defaults to the Eclipse workspace which is usually the desired location for the application. If you want to store the application in a different location, you can change the *Application(s) Root Path* value. Applications that share libraries should be in the same root path.
+5. The **Application(s) root path** defaults to the Eclipse workspace which is usually the desired location for the application. If you want to store the application in a different location, you can change the *Application(s) root path* value. Applications that share libraries should be in the same root path.
 
 6. Click **Create** to complete the application creation process.
 
@@ -124,7 +127,7 @@ For more details, see the [Eclipse IDE for ModusToolbox&trade; software user gui
 
 <details><summary><b>In command-line interface (CLI)</b></summary>
 
-ModusToolbox&trade; software provides the Project Creator as both a GUI tool and the command line tool, "project-creator-cli". The CLI tool can be used to create applications from a CLI terminal or from within batch files or shell scripts. This tool is available in the *{ModusToolbox&trade; software install directory}/tools_{version}/project-creator/* directory.
+ModusToolbox&trade; software provides the project creator as both a GUI tool and the command line tool, "project-creator-cli". The CLI tool can be used to create applications from a CLI terminal or from within batch files or shell scripts. This tool is available in the *{ModusToolbox&trade; software install directory}/tools_{version}/project-creator/* directory.
 
 Use a CLI terminal to invoke the "project-creator-cli" tool. On Windows, use the command line "modus-shell" program provided in the ModusToolbox&trade; software installation instead of a standard Windows command-line application. This shell provides access to all ModusToolbox&trade; software tools. You can access it by typing `modus-shell` in the search box in the Windows menu. In Linux and macOS, you can use any terminal application.
 
@@ -145,7 +148,7 @@ The following example will clone the "[Hello World](https://github.com/Infineon/
    project-creator-cli --board-id CY8CKIT-062-WIFI-BT --app-id mtb-example-psoc6-hello-world --user-app-name MyHelloWorld --target-dir "C:/mtb_projects"
    ```
 
-**Note:** The project-creator-cli tool uses the `git clone` and `make getlibs` commands to fetch the repository and import the required libraries. For details, see the "Project creator tools" section of the [ModusToolbox&trade; software user guide](https://www.cypress.com/ModusToolboxUserGuide) (locally available at *{ModusToolbox&trade; software install directory}/docs_{version}/mtb_user_guide.pdf*).
+**Note:** The project-creator-cli tool uses the `git clone` and `make getlibs` commands to fetch the repository and import the required libraries. For more details, see the "Project creator tools" section of the [ModusToolbox&trade; software user guide](https://www.cypress.com/ModusToolboxUserGuide) (locally available at *{ModusToolbox&trade; software install directory}/docs_{version}/mtb_user_guide.pdf*).
 
 </details>
 
@@ -153,11 +156,11 @@ The following example will clone the "[Hello World](https://github.com/Infineon/
 
 Use one of the following options:
 
-- **Use the standalone [Project Creator](https://www.cypress.com/ModusToolboxProjectCreator) tool:**
+- **Use the standalone [project creator](https://www.cypress.com/ModusToolboxProjectCreator) tool:**
 
    1. Launch Project Creator from the Windows Start menu or from *{ModusToolbox&trade; software install directory}/tools_{version}/project-creator/project-creator.exe*.
 
-   2. In the initial **Choose Board Support Package** screen, select the BSP, and click **Next**.
+   2. In the initial **Choose board support package** screen, select the BSP, and click **Next**.
 
    3. In the **Select Application** screen, select the appropriate IDE from the **Target IDE** drop-down menu.
 
@@ -177,7 +180,6 @@ For a list of supported IDEs and more details, see the "Exporting to IDEs" secti
 
 </details>
 
-
 ## Operation
 
 If using a PSoC&trade; 64 "Secure" MCU kit (like CY8CKIT-064B0S2-4343W), the PSoC&trade; 64 device must be provisioned with keys and policies before being programmed. Follow the instructions in the ["Secure Boot" SDK user guide](https://www.cypress.com/documentation/software-and-drivers/psoc-64-secure-mcu-secure-boot-sdk-user-guide) to provision the device. If the kit is already provisioned, copy-paste the keys and policy folder to the application folder.
@@ -194,7 +196,7 @@ If using a PSoC&trade; 64 "Secure" MCU kit (like CY8CKIT-064B0S2-4343W), the PSo
 
       **Note:** If you use a kit that is not a pioneer kit (pioneer kits have headers compatible with Arduino) choose `CUSTOM_INTERFACE` for this macro.
 
-   2. Specify the interrupt channel (1 or 2) of the BMI160 motion sensor that you want to use in this example using the `BMI160_INTERRUPT_CHANNEL` macro. By default, this macro is set to 1 which corresponds to INT1 pin.
+   2. Specify the interrupt channel (1 or 2) of the BMI160 motion sensor that you want to use in this example using the `BMI160_INTERRUPT_CHANNEL` macro. By default, this macro is set to '1', which corresponds to the INT1 pin.
 
    3. If you use a custom interface (`INTERFACE_USED` defined as `CUSTOM_INTERFACE`), specify the GPIO pin of PSoC&trade; 6 MCU that interfaces with the BMI160 motion sensor's interrupt pin (INT1 when `BMI160_INTERRUPT_CHANNEL` is 1; INT2 when the macro is 2) by using the `CUSTOM_INTERRUPT_PIN` macro.
 
@@ -207,9 +209,9 @@ If using a PSoC&trade; 64 "Secure" MCU kit (like CY8CKIT-064B0S2-4343W), the PSo
 
    <details><summary><b>Using Eclipse IDE for ModusToolbox&trade; software</b></summary>
 
-      1. Select the application project in the Project Explorer.
+      1. Select the application project in the project explorer.
 
-      2. In the **Quick Panel**, scroll down, and click **\<Application Name> Program (KitProg3_MiniProg4)**.
+      2. In the **quick panel**, scroll down, and click **\<Application name> Program (KitProg3_MiniProg4)**.
    </details>
 
    <details><summary><b>Using CLI</b></summary>
@@ -225,30 +227,30 @@ If using a PSoC&trade; 64 "Secure" MCU kit (like CY8CKIT-064B0S2-4343W), the PSo
       ```
    </details>
 
-After programming, the application starts automatically. Confirm that the terminal application displays the code example title and the initial orientation.
+6. After programming, the application starts automatically. Confirm that the terminal application displays the code example title and the initial orientation.
 
-**Figure 2. Terminal showing the initial orientation**
+   **Figure 2. Terminal showing the initial orientation**
 
-![](images/terminal-output.png)
+   ![](images/terminal-output.png)
 
-**Note:** If the terminal displays an error message, check the connection of the motion sensor or EPD/TFT shield with the kit.
+   **Note:** If the terminal displays an error message, check the connection of the motion sensor or EPD/TFT shield with the kit.
 
-The accelerometer sensor data is used to estimate the board’s spatial orientation. The terminal application display shows one of the six orientation states - *DISP_UP, DISP_DOWN, TOP_EDGE, BOTTOM_EDGE, LEFT_EDGE, and RIGHT_EDGE*. Side views of the Pioneer kit with the EPD shield for each orientation state are shown below.
+   The accelerometer sensor data is used to estimate the board’s spatial orientation. The terminal application display shows one of the six orientation states: *DISP_UP, DISP_DOWN, TOP_EDGE, BOTTOM_EDGE, LEFT_EDGE, and RIGHT_EDGE*. Side views of the pioneer kit with the EPD shield for each orientation state are shown below.
 
-**Figure 3. Orientation states**
+   **Figure 3. Orientation states**
 
-![](images/orientation-states.png)
+   ![](images/orientation-states.png)
 
-Change the orientation of the motion sensor and confirm that the orientation is updated on the same line in the terminal application as illustrated below.
+7. Change the orientation of the motion sensor and confirm that the orientation is updated on the same line in the terminal application as illustrated below.
 
-**Figure 4. Terminal output for orientation states**
+   **Figure 4. Terminal output for orientation states**
 
-![](images/updated-terminal-output.png)
+   ![](images/updated-terminal-output.png)
 
 
 ## Debugging
 
-You can debug the example to step through the code. In the IDE, use the **\<Application Name> Debug (KitProg3_MiniProg4)** configuration in the **Quick Panel**. For details, see the "Program and debug" section in the [Eclipse IDE for ModusToolbox&trade; software user guide](https://www.cypress.com/MTBEclipseIDEUserGuide).
+You can debug the example to step through the code. In the IDE, use the **\<Application name> Debug (KitProg3_MiniProg4)** configuration in the **quick panel**. For details, see the "Program and debug" section in the [Eclipse IDE for ModusToolbox&trade; software User Guide](https://www.cypress.com/MTBEclipseIDEUserGuide).
 
 **Note:** **(Only while debugging)** On the CM4 CPU, some code in `main()` may execute before the debugger halts at the beginning of `main()`. This means that some code executes twice – once before the debugger stops execution, and again after the debugger resets the program counter to the beginning of `main()`. See [KBA231071](https://community.cypress.com/docs/DOC-21143) to learn about this and for the workaround.
 
@@ -268,19 +270,19 @@ On PSoC&trade; 6 MCU, the GPIO pin connected to the motion sensor's interrupt pi
 
 ### Code example execution
 
-The main function initializes the BSP and the Retarget-IO library, and creates the Motion Sensor task. The task initializes the motion sensor and configures the interrupt. The task reads the accelerometer data, computes the orientation, displays it on the UART console, and then waits indefinitely for a task notification. Upon receiving an interrupt from the motion sensor, the ISR is invoked which notifies the motion sensor task. Then, the task reads the motion sensor data, updates the orientation state, and waits for the notification again. This operation continues indefinitely.
+The main function initializes the BSP and the Retarget-IO library, and creates the motion sensor task. The task initializes the motion sensor and configures the interrupt. The task reads the accelerometer data, computes the orientation, displays it on the UART console, and then waits indefinitely for a task notification. Upon receiving an interrupt from the motion sensor, the ISR is invoked which notifies the motion sensor task. Then, the task reads the motion sensor data, updates the orientation state, and waits for the notification again. This operation continues indefinitely.
 
 
 ### Resources and settings
 
-An SCB-based resource in I2C mode is configured with the help of I2C HAL APIs to implement the I2C master interface to BMI160. The I2C clock frequency is set to 1 MHz. Configuration of the motion sensor and acquiring the accelerometer information is performed over this interface.
+An SCB-based resource in I2C mode is configured with the help of I2C HAL APIs to implement the I2C master interface to BMI160. The I2C clock frequency is set to 1 MHz. Configuration of the motion sensor and acquiring the accelerometer information are performed over this interface.
 
 **Table 2. Application resources**
 
  Resource  |  Alias/object     |    Purpose
  :-------- | :-------------    | :------------
  SCB (I2C) (HAL) | kit_i2c                 | I2C master driver to communicate with the BMI160 motion sensor
- UART (HAL)      | cy_retarget_io_uart_obj | UART HAL object used by Retarget-IO for the Debug UART port
+ UART (HAL)      | cy_retarget_io_uart_obj | UART HAL object used by Retarget-IO for the debug UART port
  GPIO (HAL)      | BMI160_INTERRUPT_PIN    | Motion sensor interrupt pin
 
 <br>
@@ -290,7 +292,7 @@ An SCB-based resource in I2C mode is configured with the help of I2C HAL APIs to
 Resources  | Links
 -----------|----------------------------------
 Application notes  | [AN228571](https://www.cypress.com/AN228571) – Getting started with PSoC&trade; 6 MCU on ModusToolbox&trade; software <br>  [AN215656](https://www.cypress.com/AN215656) – PSoC&trade; 6 MCU: Dual-CPU system design <br>  [AN85951](https://www.cypress.com/AN85951) – PSoC&trade; 4 and PSoC&trade; 6 MCU CAPSENSE&trade; design guide
-Code examples  | [Using ModusToolbox&trade; software](https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software) on GitHub <br> [Using PSoC&trade; Creator](https://www.cypress.com/documentation/code-examples/psoc-345-code-examples)
+Code examples  | [Using ModusToolbox&trade; software](https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software) on GitHub
 Device documentation | [PSoC&trade; 6 MCU datasheets](https://www.cypress.com/search/all?f[0]=meta_type%3Atechnical_documents&f[1]=resource_meta_type%3A575&f[2]=field_related_products%3A114026) <br> [PSoC&trade; 6 technical reference manuals](https://www.cypress.com/search/all/PSoC%206%20Technical%20Reference%20Manual?f[0]=meta_type%3Atechnical_documents&f[1]=resource_meta_type%3A583)
 Development kits | Visit www.cypress.com/microcontrollers-mcus-kits and use the options in the **Select your kit** section to filter kits by *Product family* or *Features*.
 Libraries on GitHub  | [mtb-pdl-cat1](https://github.com/infineon/mtb-pdl-cat1) – PSoC&trade; 6 peripheral driver library (PDL)  <br> [mtb-hal-cat1](https://github.com/infineon/mtb-hal-cat1) – Hardware abstraction layer (HAL) library <br> [retarget-io](https://github.com/infineon/retarget-io) – Utility library to retarget STDIO messages to a UART port <br> [freeRTOS](https://github.com/infineon/freertos) – A port of FreeRTOS kernel for PSoC&trade; 6 and PSoC&trade; 4 MCUs <br> [sensor-motion-bmi160](https://github.com/infineon/sensor-motion-bmi160) – BMI160 inertial measurement unit (motion sensor) library
@@ -303,16 +305,16 @@ Tools  | [Eclipse IDE for ModusToolbox&trade; software](https://www.cypress.com/
 
 Cypress provides a wealth of data at www.cypress.com to help you select the right device, and quickly and effectively integrate it into your design.
 
-For PSoC&trade; 6 MCU devices, see [How to design with PSoC&trade; 6 MCU - KBA223067](https://community.cypress.com/docs/DOC-14644) in the Cypress community.
-
+For PSoC&trade; 6 MCU devices, see [How to design with PSoC&trade; 6 MCU – KBA223067](https://community.cypress.com/docs/DOC-14644) in the Cypress community.
 
 ## Document history
 
-Document title: *CE231864* - *PSoC&trade; 6 MCU: Interfacing the BMI160 motion sensor through I2C (FreeRTOS)*
+Document title: *CE231864* – *PSoC&trade; 6 MCU: Interfacing the BMI160 motion sensor through I2C (FreeRTOS)*
 
  Version | Description of change
  ------- | ---------------------
  1.0.0   | New code example
+ 1.1.0   | Added support for new kits
 
 <br>
 
@@ -320,6 +322,6 @@ Document title: *CE231864* - *PSoC&trade; 6 MCU: Interfacing the BMI160 motion s
 
 © Cypress Semiconductor Corporation, 2021. This document is the property of Cypress Semiconductor Corporation, an Infineon Technologies company, and its affiliates ("Cypress").  This document, including any software or firmware included or referenced in this document ("Software"), is owned by Cypress under the intellectual property laws and treaties of the United States and other countries worldwide.  Cypress reserves all rights under such laws and treaties and does not, except as specifically stated in this paragraph, grant any license under its patents, copyrights, trademarks, or other intellectual property rights.  If the Software is not accompanied by a license agreement and you do not otherwise have a written agreement with Cypress governing the use of the Software, then Cypress hereby grants you a personal, non-exclusive, nontransferable license (without the right to sublicense) (1) under its copyright rights in the Software (a) for Software provided in source code form, to modify and reproduce the Software solely for use with Cypress hardware products, only internally within your organization, and (b) to distribute the Software in binary code form externally to end users (either directly or indirectly through resellers and distributors), solely for use on Cypress hardware product units, and (2) under those claims of Cypress’s patents that are infringed by the Software (as provided by Cypress, unmodified) to make, use, distribute, and import the Software solely for use with Cypress hardware products.  Any other use, reproduction, modification, translation, or compilation of the Software is prohibited.
 <br>
-TO THE EXTENT PERMITTED BY APPLICABLE LAW, CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS DOCUMENT OR ANY SOFTWARE OR ACCOMPANYING HARDWARE, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  No computing device can be absolutely secure.  Therefore, despite security measures implemented in Cypress hardware or software products, Cypress shall have no liability arising out of any security breach, such as unauthorized access to or use of a Cypress product. CYPRESS DOES NOT REPRESENT, WARRANT, OR GUARANTEE THAT CYPRESS PRODUCTS, OR SYSTEMS CREATED USING CYPRESS PRODUCTS, WILL BE FREE FROM CORRUPTION, ATTACK, VIRUSES, INTERFERENCE, HACKING, DATA LOSS OR THEFT, OR OTHER SECURITY INTRUSION (collectively, "Security Breach").  Cypress disclaims any liability relating to any Security Breach, and you shall and hereby do release Cypress from any claim, damage, or other liability arising from any Security Breach.  In addition, the products described in these materials may contain design defects or errors known as errata which may cause the product to deviate from published specifications. To the extent permitted by applicable law, Cypress reserves the right to make changes to this document without further notice. Cypress does not assume any liability arising out of the application or use of any product or circuit described in this document. Any information provided in this document, including any sample design information or programming code, is provided only for reference purposes.  It is the responsibility of the user of this document to properly design, program, and test the functionality and safety of any application made of this information and any resulting product.  "High-Risk Device" means any device or system whose failure could cause personal injury, death, or property damage.  Examples of High-Risk Devices are weapons, nuclear installations, surgical implants, and other medical devices.  "Critical Component" means any component of a High-Risk Device whose failure to perform can be reasonably expected to cause, directly or indirectly, the failure of the High-Risk Device, or to affect its safety or effectiveness.  Cypress is not liable, in whole or in part, and you shall and hereby do release Cypress from any claim, damage, or other liability arising from any use of a Cypress product as a Critical Component in a High-Risk Device. You shall indemnify and hold Cypress, including its affiliates, and its directors, officers, employees, agents, distributors, and assigns harmless from and against all claims, costs, damages, and expenses, arising out of any claim, including claims for product liability, personal injury or death, or property damage arising from any use of a Cypress product as a Critical Component in a High-Risk Device. Cypress products are not intended or authorized for use as a Critical Component in any High-Risk Device except to the limited extent that (i) Cypress’s published data sheet for the product explicitly states Cypress has qualified the product for use in a specific High-Risk Device, or (ii) Cypress has given you advance written authorization to use the product as a Critical Component in the specific High-Risk Device and you have signed a separate indemnification agreement.
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS DOCUMENT OR ANY SOFTWARE OR ACCOMPANYING HARDWARE, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  No computing device can be absolutely secure.  Therefore, despite security measures implemented in Cypress hardware or software products, Cypress shall have no liability arising out of any security breach, such as unauthorized access to or use of a Cypress product.  CYPRESS DOES NOT REPRESENT, WARRANT, OR GUARANTEE THAT CYPRESS PRODUCTS, OR SYSTEMS CREATED USING CYPRESS PRODUCTS, WILL BE FREE FROM CORRUPTION, ATTACK, VIRUSES, INTERFERENCE, HACKING, DATA LOSS OR THEFT, OR OTHER SECURITY INTRUSION (collectively, "Security Breach").  Cypress disclaims any liability relating to any Security Breach, and you shall and hereby do release Cypress from any claim, damage, or other liability arising from any Security Breach.  In addition, the products described in these materials may contain design defects or errors known as errata which may cause the product to deviate from published specifications.  To the extent permitted by applicable law, Cypress reserves the right to make changes to this document without further notice. Cypress does not assume any liability arising out of the application or use of any product or circuit described in this document.  Any information provided in this document, including any sample design information or programming code, is provided only for reference purposes.  It is the responsibility of the user of this document to properly design, program, and test the functionality and safety of any application made of this information and any resulting product.  "High-Risk Device" means any device or system whose failure could cause personal injury, death, or property damage.  Examples of High-Risk Devices are weapons, nuclear installations, surgical implants, and other medical devices.  "Critical Component" means any component of a High-Risk Device whose failure to perform can be reasonably expected to cause, directly or indirectly, the failure of the High-Risk Device, or to affect its safety or effectiveness.  Cypress is not liable, in whole or in part, and you shall and hereby do release Cypress from any claim, damage, or other liability arising from any use of a Cypress product as a Critical Component in a High-Risk Device.  You shall indemnify and hold Cypress, including its affiliates, and its directors, officers, employees, agents, distributors, and assigns harmless from and against all claims, costs, damages, and expenses, arising out of any claim, including claims for product liability, personal injury or death, or property damage arising from any use of a Cypress product as a Critical Component in a High-Risk Device.  Cypress products are not intended or authorized for use as a Critical Component in any High-Risk Device except to the limited extent that (i) Cypress’s published data sheet for the product explicitly states Cypress has qualified the product for use in a specific High-Risk Device, or (ii) Cypress has given you advance written authorization to use the product as a Critical Component in the specific High-Risk Device and you have signed a separate indemnification agreement.
 <br>
-Cypress, the Cypress logo, and combinations thereof, WICED, ModusToolbox, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered trademarks of Cypress or a subsidiary of Cypress in the United States or in other countries. For a more complete list of Cypress trademarks, visit cypress.com. Other names and brands may be claimed as property of their respective owners.
+Cypress, the Cypress logo, and combinations thereof, WICED, ModusToolBox, PSoC, CapSense, EZ-USB, F-RAM, and Traveo are trademarks or registered trademarks of Cypress or a subsidiary of Cypress in the United States or in other countries.  For a more complete list of Cypress trademarks, visit cypress.com.  Other names and brands may be claimed as property of their respective owners.
