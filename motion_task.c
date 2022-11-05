@@ -8,7 +8,7 @@
 *
 *
 *******************************************************************************
-* Copyright 2021, Cypress Semiconductor Corporation (an Infineon company) or
+* Copyright 2021-2022, Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 *
 * This software, including source code, documentation and related
@@ -145,7 +145,7 @@ static void task_motion(void* pvParameters);
 static cy_rslt_t motionsensor_init(void);
 static cy_rslt_t motionsensor_config_interrupt(void);
 static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_result);
-static void motionsensor_interrupt_handler(void *handler_arg, cyhal_gpio_irq_event_t event);
+static void motionsensor_interrupt_handler(void *handler_arg, cyhal_gpio_event_t event);
 
 /*******************************************************************************
 * Function Name: create_motion_sensor_task
@@ -320,7 +320,7 @@ static cy_rslt_t motionsensor_init(void)
 *  None
 *
 *******************************************************************************/
-static void motionsensor_interrupt_handler(void *handler_arg, cyhal_gpio_irq_event_t event)
+static void motionsensor_interrupt_handler(void *handler_arg, cyhal_gpio_event_t event)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
