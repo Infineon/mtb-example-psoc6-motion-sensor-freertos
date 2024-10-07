@@ -1,15 +1,14 @@
 /******************************************************************************
 * File Name:   main.c
 *
-* Description: This is the source code for the PSoC 6 MCU: Interfacing BMI160
-*              Motion Sensor Through I2C (FreeRTOS) in FreeRTOS Example for 
-*              ModusToolbox.
+* Description: This is the source code for the PSoC 6 MCU: Motion sensor
+*              interfacing using I2C in FreeRTOS Example for ModusToolbox.
 *
 * Related Document: See README.md
 *
 *
 *******************************************************************************
-* Copyright 2021-2022, Cypress Semiconductor Corporation (an Infineon company) or
+* Copyright 2021-2024, Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 *
 * This software, including source code, documentation and related
@@ -58,7 +57,7 @@ volatile int uxTopUsedPriority;
 * Function Name: main
 ********************************************************************************
 * Summary:
-*  System entrance point. This function initializes retarget IO, sets up 
+*  System entrance point. This function initializes retarget IO, sets up
 *  the Motion sensor task, and then starts the RTOS scheduler.
 *
 * Parameters:
@@ -88,7 +87,7 @@ int main(void)
 
     /* If retarget-io init failed stop program execution */
     CY_ASSERT(result == CY_RSLT_SUCCESS);
-    
+
     /* Create the Motion Sensor task */
     result = create_motion_sensor_task();
 

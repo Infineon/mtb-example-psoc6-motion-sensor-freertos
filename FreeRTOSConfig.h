@@ -1,7 +1,7 @@
 /*
- * FreeRTOS Kernel V10.4.3
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- * Copyright (C) 2019-2021 Cypress Semiconductor Corporation, or a subsidiary of
+ * FreeRTOS Kernel V10.5.0
+ * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2019-2024 Cypress Semiconductor Corporation, or a subsidiary of
  * Cypress Semiconductor Corporation.  All Rights Reserved.
  *
  * Updated configuration to support PSoC 6 MCU.
@@ -25,7 +25,7 @@
  *
  * https://www.FreeRTOS.org
  * https://github.com/FreeRTOS
- * http://www.cypress.com
+ * http://www.infineon.com
  *
  */
 
@@ -128,6 +128,17 @@ PSoC 6 __NVIC_PRIO_BITS = 3
 6
 7 (low)     KERNEL_INTERRUPT_PRIORITY       111xxxxx (0xFF)
 
+
+CAT3 XMC devices __NVIC_PRIO_BITS = 6
+
+0 (high)
+1           MAX_API_CALL_INTERRUPT_PRIORITY 000001xx (0x07)
+..
+..
+..
+..
+63 (low)    KERNEL_INTERRUPT_PRIORITY       111111xx (0xFF)
+
 !!!! configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to zero !!!!
 See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
 
@@ -140,7 +151,11 @@ Put MAX_SYSCALL_INTERRUPT_PRIORITY in top __NVIC_PRIO_BITS bits of CM4 register
 NOTE For IAR compiler make sure that changes of this macro is reflected in
 file portable\TOOLCHAIN_IAR\COMPONENT_CM4\portasm.s in PendSV_Handler: routine
 */
+#ifdef COMPONENT_CAT3
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    0x07
+#else
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    0x3F
+#endif
 /* configMAX_API_CALL_INTERRUPT_PRIORITY is a new name for configMAX_SYSCALL_INTERRUPT_PRIORITY
  that is used by newer ports only. The two are equivalent. */
 #define configMAX_API_CALL_INTERRUPT_PRIORITY   configMAX_SYSCALL_INTERRUPT_PRIORITY
@@ -199,10 +214,10 @@ standard names - or at least those used in the unmodified vector table. */
 
 /* Enable low power tickless functionality. The RTOS abstraction library
  * provides the compatible implementation of the vApplicationSleep hook:
- * https://github.com/cypresssemiconductorco/abstraction-rtos#freertos
+ * https://github.com/Infineon/abstraction-rtos#freertos
  * The Low Power Assistant library provides additional portable configuration layer
  * for low-power features supported by the PSoC 6 devices:
- * https://github.com/cypresssemiconductorco/lpa
+ * https://github.com/Infineon/lpa
  */
 extern void vApplicationSleep( uint32_t xExpectedIdleTime );
 #define portSUPPRESS_TICKS_AND_SLEEP( xIdleTime ) vApplicationSleep( xIdleTime )
@@ -213,6 +228,11 @@ extern void vApplicationSleep( uint32_t xExpectedIdleTime );
 #endif
 
 /* Deep Sleep Latency Configuration */
+#if defined (CY_DEVICE_SECURE) && defined (DEBUG)
+#undef CY_CFG_PWR_DEEPSLEEP_LATENCY
+#define CY_CFG_PWR_DEEPSLEEP_LATENCY            (100UL)
+#endif
+
 #if( CY_CFG_PWR_DEEPSLEEP_LATENCY > 0 )
 #define configEXPECTED_IDLE_TIME_BEFORE_SLEEP   CY_CFG_PWR_DEEPSLEEP_LATENCY
 #endif
@@ -223,12 +243,22 @@ extern void vApplicationSleep( uint32_t xExpectedIdleTime );
  * GCC toolchain: the application must provide the implementation for the required
  * newlib hook functions: __malloc_lock, __malloc_unlock, __env_lock, __env_unlock.
  * FreeRTOS-compatible implementation is provided by the clib-support library:
- * https://github.com/cypresssemiconductorco/clib-support
+ * https://github.com/Infineon/clib-support
  *
  * ARM/IAR toolchains: the application must provide the reent.h header to adapt
  * FreeRTOS's configUSE_NEWLIB_REENTRANT to work with the toolchain-specific C library.
  * The compatible implementations are also provided by the clib-support library.
  */
 #define configUSE_NEWLIB_REENTRANT              1
+
+/* Deep Sleep Latency Configuration */
+#if defined (TARGET_CY8CKIT_064S0S2_4343W) && defined (DEBUG)
+#undef CY_CFG_PWR_DEEPSLEEP_LATENCY
+#define CY_CFG_PWR_DEEPSLEEP_LATENCY            (100UL)
+#endif
+
+#if( CY_CFG_PWR_DEEPSLEEP_LATENCY > 0 )
+#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP   CY_CFG_PWR_DEEPSLEEP_LATENCY
+#endif
 
 #endif /* FREERTOS_CONFIG_H */

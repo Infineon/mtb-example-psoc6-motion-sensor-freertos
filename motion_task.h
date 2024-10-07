@@ -2,13 +2,13 @@
 * File Name:   motion_task.h
 *
 * Description: This file is the public interface of motion_task.c. This file 
-*              also contains the BMI160 motion sensor configuration parameters.
+*              also contains the BMI160/270 motion sensor configuration parameters.
 *
 * Related Document: See README.md
 *
 *
 *******************************************************************************
-* Copyright 2021-2022, Cypress Semiconductor Corporation (an Infineon company) or
+* Copyright 2021-2024, Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 *
 * This software, including source code, documentation and related
@@ -52,7 +52,8 @@
 ********************************************************************************/
 #define CY8CKIT_028_EPD                 (0u)
 #define CY8CKIT_028_TFT                 (1u)
-#define CUSTOM_INTERFACE                (2u)
+#define SHIELD_XENSIV_A                 (2u)
+#define CUSTOM_INTERFACE                (3u)
 
 /*******************************************************************************
 * =================== MOTION SENSOR INTERFACE CONFIGURATION ====================
@@ -62,18 +63,18 @@
  *  - If you are using a kit that is not a Pioneer kit (Pioneer kits have  
  *    Arduino compatible headers), choose CUSTOM_INTERFACE for this macro.
  *  - For CUSTOM_INTERFACE setting, specify the Interrupt pin being used under  
- *    the BMI160_INTERRUPT_PIN macro.
+ *    the IMU_INTERRUPT_PIN macro.
  */
 #define INTERFACE_USED                  (CUSTOM_INTERFACE)
 
-/* BMI160 motion sensor has two interrupt channels (INT1 and INT2).
+/* BMI160/270 motion sensor has two interrupt channels (INT1 and INT2).
  * Specify the interrupt channel being used in this example. 
  * Valid choices: 1, 2
  */
-#define BMI160_INTERRUPT_CHANNEL        (1)
+#define IMU_INTERRUPT_CHANNEL        (1)
 
 #if (INTERFACE_USED == CUSTOM_INTERFACE)
-    /* Specify the PSoC 6 GPIO pin that interfaces with the BMI160 motion  
+    /* Specify the PSoC 6 GPIO pin that interfaces with the BMI160/270 motion
      * sensor's interrupt pin (INT1 when BMI160_INTERRUPT_CHANNEL = 1, and
      * INT2 when BMI160_INTERRUPT_CHANNEL = 2).
      */
@@ -84,8 +85,8 @@
 * ====================== OTHER CONFIGURATION MACROS ============================
 ********************************************************************************/
 /* Interrupt pin initial value and interrupt priority */
-#define BMI160_INTERRUPT_PIN_INITVAL    (0u)
-#define BMI160_INTERRUPT_PRIORITY       (5u)
+#define IMU_INTERRUPT_PIN_INITVAL    (0u)
+#define IMU_INTERRUPT_PRIORITY       (5u)
 
 /* Task priority and stack size for the Motion sensor task */
 #define TASK_MOTION_SENSOR_PRIORITY     (configMAX_PRIORITIES - 1)

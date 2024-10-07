@@ -1,14 +1,14 @@
 /******************************************************************************
 * File Name:   motion_task.c
 *
-* Description: This file contains the task that initializes and configures the 
-*              BMI160 Motion Sensor; and displays the sensor orientation.
+* Description: This file contains the task that initializes and configures the
+*              BMI160/BMI270 Motion Sensor; and displays the sensor orientation.
 *
 * Related Document: See README.md
 *
 *
 *******************************************************************************
-* Copyright 2021-2022, Cypress Semiconductor Corporation (an Infineon company) or
+* Copyright 2021-2024, Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 *
 * This software, including source code, documentation and related
@@ -41,6 +41,7 @@
 *******************************************************************************/
 
 #include "mtb_bmi160.h"
+#include "mtb_bmi270.h"
 #include "motion_task.h"
 #include "cy_pdl.h"
 #include "cyhal.h"
@@ -66,7 +67,7 @@
                          }                                            \
                      } while(0)
 
-/* Check if the EPD and TFT shields are being used with non Pioneer kits and 
+/* Check if the EPD and TFT shields are being used with non Pioneer kits and
  * throw a compile-time error accordingly.
  */
 #if (!defined(CYBSP_D0) && (INTERFACE_USED == CY8CKIT_028_EPD || INTERFACE_USED == CY8CKIT_028_TFT))
@@ -74,32 +75,34 @@
            "The kits that do not have Arduino form factor do not support the EPD or TFT shields. "\
            "Use a custom interface instead."
 #else
-    /* Assign the PSoC 6 GPIO Interrupt pin according to the interface (shield) 
-     * and the interrupt channel being configured in  'motion_task.h'. 
+    /* Assign the PSoC 6 GPIO Interrupt pin according to the interface (shield)
+     * and the interrupt channel being configured in  'motion_task.h'.
      */
     #if (INTERFACE_USED == CY8CKIT_028_EPD)
-        #if (BMI160_INTERRUPT_CHANNEL == 1)
-            #define BMI160_INTERRUPT_PIN        (CYBSP_D9)
-        #elif (BMI160_INTERRUPT_CHANNEL == 2)
-            #define BMI160_INTERRUPT_PIN        (CYBSP_D8)
+        #if (IMU_INTERRUPT_CHANNEL == 1)
+            #define IMU_INTERRUPT_PIN        (CYBSP_D9)
+        #elif (IMU_INTERRUPT_CHANNEL == 2)
+            #define IMU_INTERRUPT_PIN        (CYBSP_D8)
         #endif
     #elif (INTERFACE_USED == CY8CKIT_028_TFT)
-        #if (BMI160_INTERRUPT_CHANNEL == 1)
-            #define BMI160_INTERRUPT_PIN        (CYBSP_A2)
-        #elif (BMI160_INTERRUPT_CHANNEL == 2)
-            #define BMI160_INTERRUPT_PIN        (CYBSP_A3)
+        #if (IMU_INTERRUPT_CHANNEL == 1)
+            #define IMU_INTERRUPT_PIN        (CYBSP_A2)
+        #elif (IMU_INTERRUPT_CHANNEL == 2)
+            #define IMU_INTERRUPT_PIN        (CYBSP_A3)
         #endif
     #elif (INTERFACE_USED == CUSTOM_INTERFACE)
-        #define BMI160_INTERRUPT_PIN            (CUSTOM_INTERRUPT_PIN)
+        #define IMU_INTERRUPT_PIN            (CUSTOM_INTERRUPT_PIN)
+    #elif (INTERFACE_USED == SHIELD_XENSIV_A)
+        #define IMU_INTERRUPT_PIN            (CYBSP_D7)
     #else
         #error "Error: Incorrect configuration for the macro 'INTERFACE_USED' macro in motion_task.h"
     #endif
 
     /* Compile-time error checking for other macros in 'motion_task.h' */
-    #if (BMI160_INTERRUPT_CHANNEL != 1 && BMI160_INTERRUPT_CHANNEL != 2)
-        #error "Error: Incorrect configuration for the macro 'BMI160_INTERRUPT_CHANNEL' in motion_task.h"
-    #elif !defined(BMI160_INTERRUPT_PIN)
-        #error "Error: Incorrect configuration for the macro 'BMI160_INTERRUPT_PIN' in motion_task.h"
+    #if (IMU_INTERRUPT_CHANNEL != 1 && IMU_INTERRUPT_CHANNEL != 2)
+        #error "Error: Incorrect configuration for the macro 'IMU_INTERRUPT_CHANNEL' in motion_task.h"
+    #elif !defined(IMU_INTERRUPT_PIN)
+        #error "Error: Incorrect configuration for the macro 'IMU_INTERRUPT_PIN' in motion_task.h"
     #endif
 #endif
 
@@ -107,7 +110,7 @@
 * Global Variables
 ********************************************************************************/
 /* Orientation types:
- * Indicates which edge of the board is pointing towards the ceiling/sky 
+ * Indicates which edge of the board is pointing towards the ceiling/sky
  */
 typedef enum
 {
@@ -120,8 +123,14 @@ typedef enum
     ORIENTATION_DISP_DOWN       = 6     /* Display faces down (towards the ground) */
 } orientation_t;
 
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
 /* Instance of BMI160 sensor structure */
 static mtb_bmi160_t motion_sensor;
+#else
+/* Instance of BMI270 sensor structure */
+mtb_bmi270_data_t data;
+mtb_bmi270_t sensor_bmi270;
+#endif
 
 /* HAL structure for I2C */
 static cyhal_i2c_t kit_i2c;
@@ -129,7 +138,7 @@ static cyhal_i2c_t kit_i2c;
 /* Motion sensor task handle */
 static TaskHandle_t motion_sensor_task_handle;
 
-/* Handle for the semaphore that locks the I2C resource while reading the 
+/* Handle for the semaphore that locks the I2C resource while reading the
  * Motion Sensor data
  */
 static SemaphoreHandle_t i2c_semaphore;
@@ -138,8 +147,8 @@ static SemaphoreHandle_t i2c_semaphore;
 * Function Prototypes
 ********************************************************************************/
 /* These static functions are used by the Motion Sensor Task. These are not
- * available outside this file. See the respective function definitions for 
- * more details. 
+ * available outside this file. See the respective function definitions for
+ * more details.
  */
 static void task_motion(void* pvParameters);
 static cy_rslt_t motionsensor_init(void);
@@ -157,17 +166,17 @@ static void motionsensor_interrupt_handler(void *handler_arg, cyhal_gpio_event_t
 *  None
 *
 * Return:
-*  CY_RSLT_SUCCESS upon successful creation of the motion sensor task, else a 
+*  CY_RSLT_SUCCESS upon successful creation of the motion sensor task, else a
 *  non-zero value that indicates the error.
 *
 *******************************************************************************/
 cy_rslt_t create_motion_sensor_task(void)
 {
     BaseType_t status;
-    
+
     status = xTaskCreate(task_motion, "Motion Sensor Task", TASK_MOTION_SENSOR_STACK_SIZE,
                          NULL, TASK_MOTION_SENSOR_PRIORITY, &motion_sensor_task_handle);
-    
+
     return (status == pdPASS) ? CY_RSLT_SUCCESS : (cy_rslt_t) status;
 }
 
@@ -175,7 +184,7 @@ cy_rslt_t create_motion_sensor_task(void)
 * Function Name: task_motion
 ********************************************************************************
 * Summary:
-*  Task that configures the Motion Sensor and processes the sensor data to 
+*  Task that configures the Motion Sensor and processes the sensor data to
 *  display the sensor orientation.
 *
 * Parameters:
@@ -200,7 +209,7 @@ static void task_motion(void* pvParameters)
     printf("\x1b[2J\x1b[;H");
 
     printf("***************************************************************************\n");
-    printf("    PSoC 6 MCU: Interfacing BMI160 Motion Sensor Through I2C (FreeRTOS)    \n");
+    printf("            PSoC 6 MCU: Motion sensor interfacing using I2C                \n");
     printf("***************************************************************************\n");
 
     /* Create binary semaphore and suspend the task upon failure */
@@ -208,15 +217,15 @@ static void task_motion(void* pvParameters)
     CHECK_RESULT((i2c_semaphore == NULL), " Error : Motion Sensor - Failed to create semaphore !!\n");
     xSemaphoreGive(i2c_semaphore);
 
-    /* Initialize BMI160 motion sensor and suspend the task upon failure */
+    /* Initialize IMU motion sensor and suspend the task upon failure */
     result = motionsensor_init();
     CHECK_RESULT(result, " Error : Motion Sensor initialization failed !!\n Check hardware connection. [Error code: 0x%lx]\n", (long unsigned int)result);
-    printf(" BMI160 Motion Sensor successfully initialized.\n");
+    printf(" Motion Sensor successfully initialized.\n");
 
     /* Configure orientation interrupt and suspend the task upon failure */
     result = motionsensor_config_interrupt();
     CHECK_RESULT(result, " Error : Motion Sensor interrupt configuration failed !!\n [Error code: 0x%lx]\n", (long unsigned int)result);
-    printf(" BMI160 Motion Sensor interrupts successfully configured and enabled.\n\n\n");
+    printf(" Motion Sensor interrupts successfully configured and enabled.\n\n\n");
 
     for(;;)
     {
@@ -261,14 +270,14 @@ static void task_motion(void* pvParameters)
 * Function Name: motionsensor_init
 ********************************************************************************
 * Summary:
-*  Function that configures the I2C master interface and then initializes 
+*  Function that configures the I2C master interface and then initializes
 *  the motion sensor.
 *
 * Parameters:
 *  None
 *
 * Return:
-*  CY_RSLT_SUCCESS upon successful initialization of the motion sensor, else a 
+*  CY_RSLT_SUCCESS upon successful initialization of the motion sensor, else a
 *  non-zero value that indicates the error.
 *
 *******************************************************************************/
@@ -288,16 +297,22 @@ static cy_rslt_t motionsensor_init(void)
     xSemaphoreTake(i2c_semaphore, portMAX_DELAY);
 
     /* Initialize the I2C master interface for BMI160 motion sensor */
-    result = cyhal_i2c_init(&kit_i2c, (cyhal_gpio_t) CYBSP_I2C_SDA, 
+    result = cyhal_i2c_init(&kit_i2c, (cyhal_gpio_t) CYBSP_I2C_SDA,
                             (cyhal_gpio_t) CYBSP_I2C_SCL, NULL);
     CHECK_RESULT(result, " Error : I2C initialization failed !!\n [Error code: 0x%lx]\n", (long unsigned int)result);
-    
+
     /* Configure the I2C master interface with the desired clock frequency */
     result = cyhal_i2c_configure(&kit_i2c, &kit_i2c_cfg);
     CHECK_RESULT(result, " Error : I2C configuration failed !!\n [Error code: 0x%lx]\n", (long unsigned int)result);
 
-    /* Initialize the BMI160 motion sensor */
+    /* Initialize the IMU motion sensor */
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
     result = mtb_bmi160_init_i2c(&motion_sensor, &kit_i2c, MTB_BMI160_DEFAULT_ADDRESS);
+#else
+    result = mtb_bmi270_init_i2c(&sensor_bmi270, &kit_i2c, MTB_BMI270_ADDRESS_SEC);
+    CY_ASSERT(CY_RSLT_SUCCESS == result);
+    result = mtb_bmi270_config_default(&sensor_bmi270);
+#endif
 
     /* Release the I2C resource after initializing the motion sensor */
     xSemaphoreGive(i2c_semaphore);
@@ -309,7 +324,7 @@ static cy_rslt_t motionsensor_init(void)
 * Function Name: motionsensor_interrupt_handler
 ********************************************************************************
 * Summary:
-*  Interrupt service routine(ISR) for orientation interrupts from BMI160 sensor.
+*  Interrupt service routine(ISR) for orientation interrupts from motion sensor.
 *  The ISR notifies the Motion sensor task.
 *
 * Parameters:
@@ -345,22 +360,23 @@ static void motionsensor_interrupt_handler(void *handler_arg, cyhal_gpio_event_t
 *  None
 *
 * Return:
-*  CY_RSLT_SUCCESS upon successful orientation interrupt configuration, else a 
+*  CY_RSLT_SUCCESS upon successful orientation interrupt configuration, else a
 *  non-zero value that indicates the error.
 *
 *******************************************************************************/
 static cy_rslt_t motionsensor_config_interrupt(void)
 {
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
     /* Structure for storing interrupt configuration */
     struct bmi160_int_settg int_config;
 
     /* Status variable */
     cy_rslt_t result = CY_RSLT_SUCCESS;
 
-    /* Map the orientation interrupt to the interrupt pin specified by the 
-     * 'BMI160_INTERRUPT_CHANNEL' macro.
+    /* Map the orientation interrupt to the interrupt pin specified by the
+     * 'IMU_INTERRUPT_CHANNEL' macro.
      */
-    int_config.int_channel = (BMI160_INTERRUPT_CHANNEL == 1) ? BMI160_INT_CHANNEL_1 :
+    int_config.int_channel = (IMU_INTERRUPT_CHANNEL == 1) ? BMI160_INT_CHANNEL_1 :
                              BMI160_INT_CHANNEL_2;
     /* Select the Interrupt type as Orientation interrupt */
     int_config.int_type = BMI160_ACC_ORIENT_INT;
@@ -398,33 +414,74 @@ static cy_rslt_t motionsensor_config_interrupt(void)
     /* Block the I2C resource while configuring the motion sensor */
     xSemaphoreTake(i2c_semaphore, portMAX_DELAY);
 
-    /* Configure the Orientation interrupt */
-    result = mtb_bmi160_config_int(&motion_sensor, &int_config, (cyhal_gpio_t) BMI160_INTERRUPT_PIN,
-                                   BMI160_INTERRUPT_PRIORITY, CYHAL_GPIO_IRQ_RISE, 
+    /* Configure the BMI160 interrupt */
+    result = mtb_bmi160_config_int(&motion_sensor, &int_config, (cyhal_gpio_t) IMU_INTERRUPT_PIN,
+                                   IMU_INTERRUPT_PRIORITY, CYHAL_GPIO_IRQ_RISE,
                                    motionsensor_interrupt_handler, NULL);
-    
+
     /* Release the I2C resource after configuring the motion sensor */
     xSemaphoreGive(i2c_semaphore);
 
     return result;
+#else
+    /* Structures for storing interrupt configuration */
+    struct bmi2_int_pin_config pin_config = {0};
+
+    /* Status variable */
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+
+    /* Get the default interrupt pin configurations using the BMI270_SensorAPI library function */
+    result = bmi2_get_int_pin_config(&pin_config, &(sensor_bmi270.sensor));
+    if (result != BMI2_OK)
+    {
+        CY_ASSERT(0);
+    }
+
+    /* Interrupt pin configuration */
+    pin_config.pin_type = (IMU_INTERRUPT_CHANNEL == 1) ? BMI2_INT1 :
+                             BMI2_INT2;
+    pin_config.int_latch = BMI2_INT_NON_LATCH;
+    pin_config.pin_cfg[0].input_en = BMI2_INT_INPUT_DISABLE;
+    pin_config.pin_cfg[0].lvl = BMI2_INT_ACTIVE_LOW;
+    pin_config.pin_cfg[0].od = BMI2_INT_PUSH_PULL;
+    pin_config.pin_cfg[0].output_en = BMI2_INT_OUTPUT_ENABLE;
+
+    /* Map data ready interrupt to interrupt pin using the BMI270_SensorAPI library function */
+    result = bmi2_map_data_int(BMI2_DRDY_INT, ((IMU_INTERRUPT_CHANNEL == 1) ?
+                BMI2_INT1 : BMI2_INT2), &(sensor_bmi270.sensor));
+    if (result != BMI2_OK)
+    {
+        CY_ASSERT(0);
+    }
+
+    /* Configure the BMI270 interrupt */
+    result = mtb_bmi270_config_int(&sensor_bmi270, &pin_config, (cyhal_gpio_t) IMU_INTERRUPT_PIN,
+                    IMU_INTERRUPT_PRIORITY, CYHAL_GPIO_IRQ_FALL,
+                    motionsensor_interrupt_handler, NULL);
+
+    /* Release the I2C resource after configuring the motion sensor */
+    xSemaphoreGive(i2c_semaphore);
+
+    return result;
+#endif
 }
 
 /*******************************************************************************
 * Function Name: motionsensor_update_orientation
 ********************************************************************************
 * Summary:
-*  Function that updates the orientation status to one of the 6 types, see 
+*  Function that updates the orientation status to one of the 6 types, see
 *  'orientation_t'. This functions detects the axis that is most perpendicular
-*  to the ground based on the absolute value of acceleration in that axis. 
+*  to the ground based on the absolute value of acceleration in that axis.
 *  The sign of the acceleration signifies whether the axis is facing the ground
 *  or the opposite.
 *
 * Parameters:
-*  orientation_t *orientation_result: Address of the variable that stores the 
+*  orientation_t *orientation_result: Address of the variable that stores the
 *                                     orientation information.
 *
 * Return:
-*  CY_RSLT_SUCCESS upon successful orientation update, else a non-zero value 
+*  CY_RSLT_SUCCESS upon successful orientation update, else a non-zero value
 *  that indicates the error.
 *
 *******************************************************************************/
@@ -433,17 +490,23 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
     /* Status variable */
     cy_rslt_t result = CY_RSLT_SUCCESS;
 
-    /* Structure to store the accelerometer and gyroscope data read from the 
-     * BMI160 motion sensor
+    /* Structure to store the accelerometer and gyroscope data read from the
+     * IMU motion sensor
      */
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
     mtb_bmi160_data_t data;
+#endif
 
     /* Variables used to store absolute values of the accelerometer data */
     uint16_t abs_x, abs_y, abs_z;
 
     if(orientation_result == NULL)
     {
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
         result = BMI160_E_NULL_PTR;
+#else
+    result = BMI2_E_NULL_PTR;
+#endif
     }
     else
     {
@@ -454,28 +517,46 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
         xSemaphoreTake(i2c_semaphore, portMAX_DELAY);
 
         /* Read x, y, z components of acceleration */
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
         result = mtb_bmi160_read(&motion_sensor, &data);
+#else
+        result =  mtb_bmi270_read(&sensor_bmi270, &data);
+#endif
 
         /* Release the I2C resource after reading the motion sensor data */
         xSemaphoreGive(i2c_semaphore);
 
         if (result == CY_RSLT_SUCCESS)
         {
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
             /* Get the absolute values of the accelerations along each axis */
             abs_x = abs(data.accel.x);
             abs_y = abs(data.accel.y);
             abs_z = abs(data.accel.z);
+#else
+            abs_x = abs(data.sensor_data.acc.x);
+            abs_y = abs(data.sensor_data.acc.y);
+            abs_z = abs(data.sensor_data.acc.z);
+#endif
 
-            /* Z axis (perpendicular to face of the display) is most aligned with 
+            /* Z axis (perpendicular to face of the display) is most aligned with
              * gravity.
              */
             if ((abs_z > abs_x) && (abs_z > abs_y))
             {
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
                 if (data.accel.z < 0)
                 {
                     /* Display faces down (towards the ground) */
                     *orientation_result = ORIENTATION_DISP_DOWN;
                 }
+#else
+                if (data.sensor_data.acc.z < 0)
+                {
+                    /* Display faces down (towards the ground) */
+                    *orientation_result = ORIENTATION_DISP_DOWN;
+                }
+#endif
                 else
                 {
                     /* Display faces up (towards the sky/ceiling) */
@@ -487,6 +568,7 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
              */
             else if ((abs_y > abs_x) && (abs_y > abs_z))
             {
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
                 if (data.accel.y > 0)
                 {
                     /* Display has an inverted landscape orientation */
@@ -497,12 +579,25 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
                     /* Display has landscape orientation */
                     *orientation_result = ORIENTATION_TOP_EDGE;
                 }
+#else
+                if (data.sensor_data.acc.y > 0)
+                {
+                    /* Display has an inverted landscape orientation */
+                    *orientation_result = ORIENTATION_TOP_EDGE;
+                }
+                else
+                {
+                    /* Display has landscape orientation */
+                    *orientation_result = ORIENTATION_BOTTOM_EDGE;
+                }
+#endif
             }
             /* X axis (parallel with longer edge of board) is most aligned with
              * gravity.
              */
             else
             {
+#if (INTERFACE_USED != SHIELD_XENSIV_A)
                 if (data.accel.x < 0)
                 {
                     /* Display has an inverted portrait orientation */
@@ -513,6 +608,18 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
                     /* Display has portrait orientation */
                     *orientation_result = ORIENTATION_LEFT_EDGE;
                 }
+#else
+                if (data.sensor_data.acc.x < 0)
+                {
+                    /* Display has an inverted portrait orientation */
+                    *orientation_result = ORIENTATION_LEFT_EDGE;
+                }
+                else
+                {
+                    /* Display has portrait orientation */
+                    *orientation_result = ORIENTATION_RIGHT_EDGE;
+                }
+#endif
             }
         }
     }
