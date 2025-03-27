@@ -8,7 +8,7 @@
 *
 *
 *******************************************************************************
-* Copyright 2021-2024, Cypress Semiconductor Corporation (an Infineon company) or
+* Copyright 2021-2025, Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 *
 * This software, including source code, documentation and related
@@ -40,9 +40,12 @@
 * so agrees to indemnify Cypress against all liability.
 *******************************************************************************/
 
-#include "mtb_bmi160.h"
-#include "mtb_bmi270.h"
 #include "motion_task.h"
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI270)
+#include "mtb_bmi270.h"
+#else
+#include "mtb_bmi160.h"
+#endif
 #include "cy_pdl.h"
 #include "cyhal.h"
 #include "cybsp.h"
@@ -50,6 +53,8 @@
 #include "task.h"
 #include "semphr.h"
 #include "cy_retarget_io.h"
+#include "stdlib.h"
+
 
 /******************************************************************************
 * Macros
@@ -90,12 +95,18 @@
         #elif (IMU_INTERRUPT_CHANNEL == 2)
             #define IMU_INTERRUPT_PIN        (CYBSP_A3)
         #endif
-    #elif (INTERFACE_USED == CUSTOM_INTERFACE)
-        #define IMU_INTERRUPT_PIN            (CUSTOM_INTERRUPT_PIN)
     #elif (INTERFACE_USED == SHIELD_XENSIV_A)
         #define IMU_INTERRUPT_PIN            (CYBSP_D7)
+    #elif (INTERFACE_USED == CY8CKIT_062S2_AI)
+        #if (IMU_INTERRUPT_CHANNEL == 1)
+            #define IMU_INTERRUPT_PIN        (CYBSP_IMU_INT1)
+        #elif (IMU_INTERRUPT_CHANNEL == 2)
+            #define IMU_INTERRUPT_PIN        (CYBSP_IMU_INT2)
+        #endif
+    #elif (INTERFACE_USED == CUSTOM_INTERFACE)
+        #define IMU_INTERRUPT_PIN            (CUSTOM_INTERRUPT_PIN)
     #else
-        #error "Error: Incorrect configuration for the macro 'INTERFACE_USED' macro in motion_task.h"
+        #error "Error: Incorrect configuration for the macro 'INTERFACE_USED' in motion_task.h"
     #endif
 
     /* Compile-time error checking for other macros in 'motion_task.h' */
@@ -123,7 +134,7 @@ typedef enum
     ORIENTATION_DISP_DOWN       = 6     /* Display faces down (towards the ground) */
 } orientation_t;
 
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
 /* Instance of BMI160 sensor structure */
 static mtb_bmi160_t motion_sensor;
 #else
@@ -306,10 +317,14 @@ static cy_rslt_t motionsensor_init(void)
     CHECK_RESULT(result, " Error : I2C configuration failed !!\n [Error code: 0x%lx]\n", (long unsigned int)result);
 
     /* Initialize the IMU motion sensor */
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
     result = mtb_bmi160_init_i2c(&motion_sensor, &kit_i2c, MTB_BMI160_DEFAULT_ADDRESS);
 #else
-    result = mtb_bmi270_init_i2c(&sensor_bmi270, &kit_i2c, MTB_BMI270_ADDRESS_SEC);
+    #if (INTERFACE_USED == CY8CKIT_062S2_AI)
+        result = mtb_bmi270_init_i2c(&sensor_bmi270, &kit_i2c, MTB_BMI270_ADDRESS_DEFAULT);
+    #else
+        result = mtb_bmi270_init_i2c(&sensor_bmi270, &kit_i2c, MTB_BMI270_ADDRESS_SEC);
+    #endif
     CY_ASSERT(CY_RSLT_SUCCESS == result);
     result = mtb_bmi270_config_default(&sensor_bmi270);
 #endif
@@ -366,7 +381,7 @@ static void motionsensor_interrupt_handler(void *handler_arg, cyhal_gpio_event_t
 *******************************************************************************/
 static cy_rslt_t motionsensor_config_interrupt(void)
 {
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
     /* Structure for storing interrupt configuration */
     struct bmi160_int_settg int_config;
 
@@ -493,7 +508,7 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
     /* Structure to store the accelerometer and gyroscope data read from the
      * IMU motion sensor
      */
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
     mtb_bmi160_data_t data;
 #endif
 
@@ -502,10 +517,10 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
 
     if(orientation_result == NULL)
     {
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
         result = BMI160_E_NULL_PTR;
 #else
-    result = BMI2_E_NULL_PTR;
+        result = BMI2_E_NULL_PTR;
 #endif
     }
     else
@@ -517,7 +532,7 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
         xSemaphoreTake(i2c_semaphore, portMAX_DELAY);
 
         /* Read x, y, z components of acceleration */
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
         result = mtb_bmi160_read(&motion_sensor, &data);
 #else
         result =  mtb_bmi270_read(&sensor_bmi270, &data);
@@ -528,7 +543,7 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
 
         if (result == CY_RSLT_SUCCESS)
         {
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
             /* Get the absolute values of the accelerations along each axis */
             abs_x = abs(data.accel.x);
             abs_y = abs(data.accel.y);
@@ -544,7 +559,7 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
              */
             if ((abs_z > abs_x) && (abs_z > abs_y))
             {
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
                 if (data.accel.z < 0)
                 {
                     /* Display faces down (towards the ground) */
@@ -568,7 +583,7 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
              */
             else if ((abs_y > abs_x) && (abs_y > abs_z))
             {
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
                 if (data.accel.y > 0)
                 {
                     /* Display has an inverted landscape orientation */
@@ -597,7 +612,7 @@ static cy_rslt_t motionsensor_update_orientation(orientation_t *orientation_resu
              */
             else
             {
-#if (INTERFACE_USED != SHIELD_XENSIV_A)
+#if (SENSOR_TYPE == SENSOR_TYPE_BMI160)
                 if (data.accel.x < 0)
                 {
                     /* Display has an inverted portrait orientation */

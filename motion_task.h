@@ -1,14 +1,14 @@
 /******************************************************************************
 * File Name:   motion_task.h
 *
-* Description: This file is the public interface of motion_task.c. This file 
+* Description: This file is the public interface of motion_task.c. This file
 *              also contains the BMI160/270 motion sensor configuration parameters.
 *
 * Related Document: See README.md
 *
 *
 *******************************************************************************
-* Copyright 2021-2024, Cypress Semiconductor Corporation (an Infineon company) or
+* Copyright 2021-2025, Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 *
 * This software, including source code, documentation and related
@@ -53,32 +53,44 @@
 #define CY8CKIT_028_EPD                 (0u)
 #define CY8CKIT_028_TFT                 (1u)
 #define SHIELD_XENSIV_A                 (2u)
-#define CUSTOM_INTERFACE                (3u)
+#define CY8CKIT_062S2_AI                (3u)
+#define CUSTOM_INTERFACE                (4u)
+
+#define SENSOR_TYPE_BMI160              (0)
+#define SENSOR_TYPE_BMI270              (1)
 
 /*******************************************************************************
 * =================== MOTION SENSOR INTERFACE CONFIGURATION ====================
 ********************************************************************************/
-/* Specify the interface being used with the CE. 
- * Valid choices: CY8CKIT_028_EPD, CY8CKIT_028_TFT, CUSTOM_INTERFACE
- *  - If you are using a kit that is not a Pioneer kit (Pioneer kits have  
+/* Specify the interface being used with the CE.
+ * Valid choices: CY8CKIT_028_EPD, CY8CKIT_028_TFT, SHIELD_XENSIV_A,
+ * CY8CKIT_062S2_AI, CUSTOM_INTERFACE
+ *  - If you are using a kit that is not a Pioneer kit (Pioneer kits have
  *    Arduino compatible headers), choose CUSTOM_INTERFACE for this macro.
- *  - For CUSTOM_INTERFACE setting, specify the Interrupt pin being used under  
+ *  - For CUSTOM_INTERFACE setting, specify the Interrupt pin being used under
  *    the IMU_INTERRUPT_PIN macro.
  */
 #define INTERFACE_USED                  (CUSTOM_INTERFACE)
 
 /* BMI160/270 motion sensor has two interrupt channels (INT1 and INT2).
- * Specify the interrupt channel being used in this example. 
+ * Specify the interrupt channel being used in this example.
  * Valid choices: 1, 2
  */
-#define IMU_INTERRUPT_CHANNEL        (1)
+#define IMU_INTERRUPT_CHANNEL           (1)
 
-#if (INTERFACE_USED == CUSTOM_INTERFACE)
-    /* Specify the PSoC 6 GPIO pin that interfaces with the BMI160/270 motion
+#if (INTERFACE_USED == CY8CKIT_028_EPD || INTERFACE_USED == CY8CKIT_028_TFT)
+    #define SENSOR_TYPE                 (SENSOR_TYPE_BMI160)
+#elif (INTERFACE_USED == SHIELD_XENSIV_A || INTERFACE_USED == CY8CKIT_062S2_AI)
+    #define SENSOR_TYPE                 (SENSOR_TYPE_BMI270)
+#elif (INTERFACE_USED == CUSTOM_INTERFACE)
+    /* Specify the PSoC 6 GPIO pin that interfaces with the BMI160/BMI270 motion
      * sensor's interrupt pin (INT1 when BMI160_INTERRUPT_CHANNEL = 1, and
      * INT2 when BMI160_INTERRUPT_CHANNEL = 2).
      */
     #define CUSTOM_INTERRUPT_PIN        (P10_0)
+
+    /* Specify the type of sensor interfaced */
+    #define SENSOR_TYPE                 (SENSOR_TYPE_BMI270)
 #endif
 
 /*******************************************************************************
